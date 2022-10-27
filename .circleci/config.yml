@@ -15,25 +15,31 @@ orbs:
   python: circleci/python@1.5.0
 
 build-template: &tmpl
-  steps:
-    - checkout
-    - run:
-        name: Install package
-        command: pip install .
-    - run:
-        name: Install pytest
-        command: pip install pytest
-    - run:
-        name: Run tests
-        command: pytest
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+    - image: continuumio/miniconda3
+    resource_class: small
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - install_conda_environment
+      - run:
+          name: Install package
+          command: pip install .
+      - run:
+          name: Run tests
+          command: pytest
+
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  python_3_10: {<<: *tmpl, docker: [image: cimg/python:3.10.2]}
-  python_3_9: {<<: *tmpl, docker: [image: cimg/python:3.9.12]}
-  python_3_8: {<<: *tmpl, docker: [image: cimg/python:3.8.13]}
-  python_3_7: {<<: *tmpl, docker: [image: cimg/python:3.7.13]}
+  python_3_10: {<<: *tmpl, environment: [PYTHON_VERSION=3.10]}
+  python_3_9: {<<: *tmpl, environment: [PYTHON_VERSION=3.9]}
+  python_3_8: {<<: *tmpl, environment: [PYTHON_VERSION=3.8]}
+  python_3_7: {<<: *tmpl, environment: [PYTHON_VERSION=3.7]}
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -42,6 +48,22 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - python_3_10
-      - python_3_9
-      - python_3_8
-      - python_3_7
+      #- python_3_9
+      #- python_3_8
+      #- python_3_7
+
+commands:
+  install_conda_environment:
+    steps:
+      - run:
+          name: Install requirements
+          no_output_timeout: 30m
+          command: |
+            if [ ! -e /opt/conda/envs/opendrift ]; then
+              conda create -n opendrift -y -c conda-forge "python=${PYTHON_VERSION}" opendrift 
+            fi
+
+      - run:
+          name: List environment
+          command: |
+            conda list -n testenv
