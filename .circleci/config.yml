@@ -64,6 +64,10 @@ commands:
             fi
 
       - run:
+          name: Activate conda environment
+          command: conda activate opendrift
+
+      - run:
           name: List environment
           command: |
-            conda list -n testenv
+            conda list
