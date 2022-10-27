@@ -27,10 +27,10 @@ build-template: &tmpl
       - install_conda_environment
       - run:
           name: Install package
-          command: pip install .
+          command: conda run -n opendrift pip install .
       - run:
           name: Run tests
-          command: pytest
+          command: conda run -n opendrift pytest
 
 
 # Define a job to be invoked later in a workflow.
@@ -64,10 +64,6 @@ commands:
             fi
 
       - run:
-          name: Activate conda environment
-          command: conda activate opendrift
-
-      - run:
           name: List environment
           command: |
-            conda list
+            conda list -n opendrift
