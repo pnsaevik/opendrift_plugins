@@ -60,7 +60,8 @@ commands:
           no_output_timeout: 30m
           command: |
             if [ ! -e /opt/conda/envs/opendrift ]; then
-              conda create -n opendrift -y -c conda-forge "python=${PYTHON_VERSION}" opendrift pytest
+              conda create -n opendrift -y -c conda-forge "python=${PYTHON_VERSION}" mamba
+              conda run -n opendrift mamba install -y -c conda-forge opendrift pytest            
             fi
 
       - run:
